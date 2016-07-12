@@ -19,7 +19,7 @@ namespace ObjectComparison
             Person p2 = new Person();
             p2.Age = 55;
             p2.Gender = "Male";
-            p2.Name = "Billy";
+            p2.Name = "Bob";
 
             Compare cc = new Compare();
             List<string> differences = cc.GetChanges(p, p2);
@@ -27,9 +27,7 @@ namespace ObjectComparison
             {
                 Console.Write(differences[0]);
             }
-            Console.Write(cc.length);
-
-           
+          
             Console.ReadLine();
         }
     }

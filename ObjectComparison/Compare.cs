@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reflection;
 
 namespace ObjectComparison
 {
@@ -10,32 +9,53 @@ namespace ObjectComparison
     {
         public int length;
 
-        public List<string> GetChanges(Person firstInstance, Person secondInstance)
+        public List<string> GetChanges(Object firstInstance, Object secondInstance)
         {
             length = 0;
-            List<string> diffs = new List<string>();
-            int name = firstInstance.Name.CompareTo(secondInstance.Name);
-            int age = firstInstance.Age.CompareTo(secondInstance.Age);
-            int gender = firstInstance.Gender.CompareTo(secondInstance.Gender);
-            foreach (var prop in firstInstance.GetType().GetProperties())
+            var diffs = new List<string>();
+            var tmp = new List<string>();
+            Type t1 = firstInstance.GetType();
+            Type t2 = secondInstance.GetType();
+
+            if (!isSameObject(t1, t2))
             {
-                if (prop.Name.Equals("Name") && name == -1)
+                return diffs;
+            }
+
+            firstInstance.GetType().GetProperties().ToList().ForEach(p => { tmp.Add(p.Name); });
+
+            int count = 0;
+            foreach (
+                PropertyInfo pi in
+                    t1.GetProperties(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public))
+            {
+                count++;
+                object val = pi.GetValue(firstInstance);
+                object tval = pi.GetValue(secondInstance);
+                if (val != tval)
                 {
-                    length++;
-                    diffs.Add("Name changed from " + firstInstance.Name + " to " + secondInstance.Name);
-                }
-                if (prop.Name.Equals("Age") && age == -1)
-                {
-                    length++;
-                    diffs.Add("Age changed from " + firstInstance.Age + " to " + secondInstance.Age);
-                }
-                if (prop.Name.Equals("Gender") && gender == -1)
-                {
-                    length++;
-                    diffs.Add("Gender changed from " + firstInstance.Gender + " to " + secondInstance.Gender);
+                    string field = tmp[count - 1];
+                    diffs.Add(field + " changed from " + val + " to " + tval);
                 }
             }
             return diffs;
+        }
+
+
+        private bool isSameObject(Type obj1, Type obj2)
+        {
+            bool result = false;
+            foreach (Object info in obj1.GetProperties())
+            {
+                foreach (Object info2 in obj2.GetProperties())
+                {
+                    if (info == info2)
+                    {
+                        result = true;
+                    }
+                }
+            }
+            return result;
         }
     }
 }
